@@ -1,0 +1,48 @@
+#!/bin/bash
+
+ask() {
+    read -rp "$1 [y/N] " answer
+    [[ "$answer" =~ ^([yY]|[yY][eE][sS])$ ]]
+}
+
+if ask "Do you want to update mirrors with reflector?"; then
+    echo "===> Updating mirrors..."
+    sudo reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist
+fi
+
+if ask "Do you want to check for pending updates with checkupdates?"; then
+    echo "===> Checking for pending updates..."
+    checkupdates
+fi
+
+if ask "Do you want to update the system with pacman?"; then
+    echo "===> Updating system with pacman..."
+    sudo pacman -Syu
+fi
+
+if ask "Do you want to update AUR packages with yay?"; then
+    echo "===> Updating AUR packages..."
+    yay -Sua
+fi
+
+if ask "Do you want to remove orphan packages?"; then
+    echo "===> Removing orphan packages..."
+    sudo pacman -Rns $(pacman -Qdtq)
+fi
+
+if ask "Do you want to clean old package cache?"; then
+    echo "===> Cleaning package cache..."
+    sudo paccache -rk2
+fi
+
+if ask "Do you want to list failed services?"; then
+    echo "===> Listing failed systemd services..."
+    systemctl list-units --failed
+fi
+
+if ask "Do you want to check boot errors?"; then
+    echo "===> Checking boot errors..."
+    journalctl -p 3 -xb
+fi
+
+echo "===> Done!"
